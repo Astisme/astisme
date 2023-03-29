@@ -1,4 +1,4 @@
-### Hi there 👋
+# Well, hello there... 👋
 
 <!--
 **Astisme/astisme** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
@@ -14,3 +14,13 @@ Here are some ideas to get you started:
 - 😄 Pronouns: ...
 - ⚡ Fun fact: ...
 -->
+## My most recent work
+
+
+## What I've learnt
+
+
+## Give me a visit
+[Click here](https://www.alfredoit.dev/) to visit my website.
+
+Do you want to know me better? [Check out this link](https://www.alfredoit.dev/aboutme/)
