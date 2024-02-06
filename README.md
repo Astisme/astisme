@@ -19,8 +19,9 @@ Here are some ideas to get you started:
 
 ## What I've learnt
 
-
+<!--
 ## Give me a visit
 [Click here](https://www.alfredoit.dev/) to visit my website.
+-->
 
 Do you want to know me better? [Check out this link](https://www.alfredoit.dev/aboutme/)
