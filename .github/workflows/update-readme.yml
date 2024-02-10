@@ -11,14 +11,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4.1.1
 
-      - name: Setup python
-        uses: actions/setup-python@v5.0.0
+      - name: Setup node
+        uses: actions/setup-node@v4.0.2
 
-      - name: Run python
-        run: python3 src/get_commits.py
+      - name: Run npm
+        run: npm src/get_commits.js
 
       - name: Commit if changed
-        run:
+        run: |-
           git config --global user.name "Sir. Automation"
           git config --global user.email "auto@mate.com"
           git commit -am "Reporting for duty" || exit 0
