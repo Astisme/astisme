@@ -9,5 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
 
+      - name: Setup python
+        uses: actions/setup-python@v5.0.0
+
+      - name: Run python
+        run: python3 scr/get_commits.py
+
+      - name: Commit if changed
+        run:
+          git config --global user.name "Sir. Automation"
+          git config --global user.email "auto@mate.com"
+          git commit -am "Reporting for duty" || exit 0
+          git push
