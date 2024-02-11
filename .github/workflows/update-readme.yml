@@ -1,4 +1,6 @@
 name: Update README
+env:
+  TOKEN: $({ secrets.GITHUB_TOKEN })
 on:
   push:
   schedule:
@@ -14,12 +16,12 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4.0.2
 
+  update:
+    needs: build
+    runs-on: ubuntu-latest
+    steps: 
       - name: Update readme
         run: node src/get_commits.js
 
       - name: Commit if changed
-        run: |-
-          git config --global user.name "Sir. Automation"
-          git config --global user.email "auto@mate.com"
-          git commit -am "Reporting for duty" || exit 0
-          git push
+        run: ./src/commit.bash
