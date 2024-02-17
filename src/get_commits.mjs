@@ -2,33 +2,32 @@ import { Octokit } from "octokit";
 const octokit = new Octokit({ auth: process.env.TOKEN });
 
 async function getRepos() {
-  //return await fetch("https://api.github.com/users/Astisme/repos");
-  return await octokit.request("GET https://api.github.com/users/Astisme/repos");
+  const repos = await octokit.request("GET https://api.github.com/users/Astisme/repos");
+  return await repos.data;
 }
 
 async function getCommits(full_name) {
-  //return await fetch(`https://api.github.com/repos/${full_name}/commits`);
-  return await octokit.request(`GET https://api.github.com/repos/${full_name}/commits`);
+  const commits = await octokit.request(`GET https://api.github.com/repos/${full_name}/commits`);
+  return await commits.data;
 }
 
-//async function run() {
+async function run() {
   const myRepos = await getRepos();
   const latestCommits = [];
 
-  for(const repo in myRepos){
+  for(const repo of myRepos){
     const commits = await getCommits(repo.full_name);
-    console.log({commits});
     let i = 0;
-    for(const com in commits){
+    for(const com of commits){
       if(i >= 10) break;
       latestCommits.push(com);
       i++;
     }
   }
 
-  console.log({latestCommits,zero:latestCommits[0]});
   const sortedCommits = latestCommits.sort((a,b) => a.commit.author.date - b.commit.author.date).slice(0, 10);
-  console.log({sortedCommits})
-//}
+  console.log({zero:sortedCommits[0],com:sortedCommits[0].commit});
+  //commit.message, commit.author.date, commit.html_url, +/-
+}
 
-//run();
+run();

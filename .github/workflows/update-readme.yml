@@ -17,12 +17,15 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4.0.2
 
+      - name: Install dependencies
+        run: npm install
+
   update:
     needs: build
     runs-on: ubuntu-latest
     steps: 
       - name: Update readme
-        run: node src/get_commits.js
+        run: node src/get_commits.mjs
 
       - name: Commit if changed
         run: bash src/commit.bash
