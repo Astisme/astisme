@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-update:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -20,10 +20,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-  update:
-    needs: build
-    runs-on: ubuntu-latest
-    steps: 
       - name: Update readme
         run: node src/get_commits.mjs
 
