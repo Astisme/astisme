@@ -1,6 +1,6 @@
 name: Update README
 env:
-  TOKEN: $({ secrets.GITHUB_TOKEN })
+  TOKEN: $({ secrets.UPDATE_TOKEN })
 on:
   push:
   schedule:
