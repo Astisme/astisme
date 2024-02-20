@@ -90,7 +90,8 @@ const latestWithDetail = await getDetailedCommits(latestCommitsByRepo);
 const refToRepo = {};
 const simpleCommits = [];
 for(const repoName in latestWithDetail) {
-  for(const commit in latestWithDetail[repoName]) {
+  for(const commit of latestWithDetail[repoName]) {
+    console.log(commit);
     refToRepo[commit.sha] = repoName;
     simpleCommits.push(commit);
   }
