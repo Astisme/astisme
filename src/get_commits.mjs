@@ -19,14 +19,11 @@ async function getLatestCommits(repos) {
   for(const repo of repos){
     const repoName = repo.full_name;
     const commits = await getCommits(repo.full_name);
+    latest[repoName] = [];
     let i = 0;
     for(const com of commits){
       if(i >= 10) break;
-      if(latest[repoName] == null){
-        latest[repoName] = [com];
-      } else {
-        latest[repoName].push(com);
-      }
+      latest[repoName].push(com);
       i++;
     }
   }
@@ -36,6 +33,7 @@ async function getLatestCommits(repos) {
 async function getDetailedCommits(reposWithCommits) {
   const detailedMap = {};
   for(const repoName in reposWithCommits) {
+    detailedMap[repoName] = [];
     for(const com of reposWithCommits[repoName]) {
       const ref = com.sha;
       console.log({repoName,ref});
@@ -45,14 +43,18 @@ async function getDetailedCommits(reposWithCommits) {
           "Accept": "application/vnd.github+json"
         }
       });
-      if(detailedMap[repoName] == null){
-        detailedMap[repoName] = [await detailed];
-      } else {
-        detailedMap[repoName].push(await detailed);
-      }
+      detailedMap[repoName].push(await detailed);
     }
   }
   return detailedMap;
+
+/*
+"stats": {
+    "additions": 104,
+    "deletions": 4,
+    "total": 108
+  },
+*/
 }
 
 async function getStarredByMe() {
@@ -86,14 +88,20 @@ function updateReadme(readmeFile, afterThisRow, toInsert) {}
 const myRepos = await getRepos();
 const latestCommitsByRepo = await getLatestCommits(myRepos);
 const latestWithDetail = await getDetailedCommits(latestCommitsByRepo);
-console.log({latestWithDetail});
+const refToRepo = {};
+const simpleCommits = [];
+for(const repoName in latestWithDetail) {
+  for(const commit in latestWithDetail[repoName]) {
+    refToRepo[commit.sha] = repoName;
+    simpleCommits.push(commit);
+  }
+}
+console.log({latestWithDetail,refToRepo});
 
-const sortedCommits = latestWithDetail
-                        .sort((a,b) => {
-                          console.log({a,b});
-                          return a.commit.author.date - b.commit.author.date
-                        })
-                        .slice(0, 10);
+const sortedCommits = simpleCommits
+                        .sort((a,b) => a.commit.author.date - b.commit.author.date)
+                        .slice(0, 10)
+                        .map(a => latestWithDetail[refToRepo[a.sha]]);
 //commit.message, commit.author.date, commit.html_url, +/-
 const formattedCommits = formatAllCommits(sortedCommits);
 //console.log({zero:formattedCommits[0],com:formattedCommits[0].commit});
