@@ -46,14 +46,6 @@ async function getDetailedCommits(reposWithCommits) {
     }
   }
   return detailedMap;
-
-/*
-"stats": {
-    "additions": 104,
-    "deletions": 4,
-    "total": 108
-  },
-*/
 }
 
 async function getStarredByMe() {
@@ -72,6 +64,13 @@ async function getReadMe() {
 }
 
 function formatCommit(commit) {
+/*
+"stats": {
+    "additions": 104,
+    "deletions": 4,
+    "total": 108
+  },
+*/
   return commit;
 }
 
@@ -91,7 +90,6 @@ const refToRepo = {};
 const simpleCommits = [];
 for(const repoName in latestWithDetail) {
   for(const commit of latestWithDetail[repoName]) {
-    console.log(commit);
     refToRepo[commit.sha] = repoName;
     simpleCommits.push(commit);
   }
@@ -103,6 +101,7 @@ const sortedCommits = simpleCommits
                         .slice(0, 10)
                         .map(a => latestWithDetail[refToRepo[a.sha]]);
 //commit.message, commit.author.date, commit.html_url, +/-
+console.log({latest:sortedCommits[0]});
 const formattedCommits = formatAllCommits(sortedCommits);
 //console.log({zero:formattedCommits[0],com:formattedCommits[0].commit});
 
