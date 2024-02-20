@@ -91,7 +91,7 @@ console.log({latestWithDetail});
 const sortedCommits = latestWithDetail
                         .sort((a,b) => {
                           console.log({a,b});
-                          return a.commit.author.date - b.commit.author.date)
+                          return a.commit.author.date - b.commit.author.date
                         }
                         .slice(0, 10);
 //commit.message, commit.author.date, commit.html_url, +/-
