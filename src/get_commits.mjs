@@ -1,6 +1,8 @@
 import { Octokit } from "octokit"; 
 const octokit = new Octokit({ auth: process.env.TOKEN });
 
+import * as fs from "fs";
+
 async function getRepos() {
   const repos = await octokit.request("GET https://api.github.com/users/Astisme/repos");
   return await repos.data;
