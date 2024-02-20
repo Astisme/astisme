@@ -1,30 +1,58 @@
 import { Octokit } from "octokit"; 
-const octokit = new Octokit({ auth: process.env.TOKEN });
-
 import * as fs from "fs";
 
+const owner = "Astisme";
+const octokit = new Octokit({ auth: process.env.TOKEN });
+
 async function getRepos() {
-  const repos = await octokit.request("GET https://api.github.com/users/Astisme/repos");
+  const repos = await octokit.request(`GET https://api.github.com/users/${owner}/repos`);
   return await repos.data;
 }
 
-async function getCommits(full_name) {
-  const commits = await octokit.request(`GET https://api.github.com/repos/${full_name}/commits`);
+async function getCommits(repoName) {
+  const commits = await octokit.request(`GET https://api.github.com/repos/${repoName}/commits`);
   return await commits.data;
 }
 
 async function getLatestCommits(repos) {
-  const latest = [];
+  const latest = {};
   for(const repo of repos){
+    const repoName = repo.full_name;
     const commits = await getCommits(repo.full_name);
     let i = 0;
     for(const com of commits){
       if(i >= 10) break;
-      latest.push(com);
+      if(latest[repoName] == null){
+        latest[repoName] = [com];
+      } else {
+        latest[repoName].push(com);
+      }
       i++;
     }
   }
   return latest;
+}
+
+async function getDetailedCommits(reposWithCommits) {
+  const detailedMap = {};
+  for(const repoName in reposWithCommits) {
+    for(const com of reposWithCommits[repoName]) {
+      const ref = com.sha;
+      console.log({repoName,ref});
+      const detailed = await octokit.request(`GET /repos/${repoName}/commits/${ref}`, {
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28',
+          "Accept": "application/vnd.github+json"
+        }
+      });
+      if(detailedMap[repoName] == null){
+        detailedMap[repoName] = [await detailed];
+      } else {
+        detailedMap[repoName].push(await detailed);
+      }
+    }
+  }
+  return detailedMap;
 }
 
 async function getStarredByMe() {
@@ -56,9 +84,15 @@ function formatAllCommits(commits) {
 function updateReadme(readmeFile, afterThisRow, toInsert) {}
 
 const myRepos = await getRepos();
-const latestCommits = await getLatestCommits(myRepos);
+const latestCommitsByRepo = await getLatestCommits(myRepos);
+const latestWithDetail = await getDetailedCommits(latestCommitsByRepo);
+console.log({latestWithDetail});
 
-const sortedCommits = latestCommits.sort((a,b) => a.commit.author.date - b.commit.author.date)
+const sortedCommits = latestWithDetail
+                        .sort((a,b) => {
+                          console.log({a,b});
+                          return a.commit.author.date - b.commit.author.date)
+                        }
                         .slice(0, 10);
 //commit.message, commit.author.date, commit.html_url, +/-
 const formattedCommits = formatAllCommits(sortedCommits);
