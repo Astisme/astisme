@@ -36,14 +36,13 @@ async function getDetailedCommits(reposWithCommits) {
     detailedMap[repoName] = [];
     for(const com of reposWithCommits[repoName]) {
       const ref = com.sha;
-      console.log({repoName,ref});
       const detailed = await octokit.request(`GET /repos/${repoName}/commits/${ref}`, {
         headers: {
           'X-GitHub-Api-Version': '2022-11-28',
           "Accept": "application/vnd.github+json"
         }
       });
-      detailedMap[repoName].push(await detailed);
+      detailedMap[repoName].push(await detailed.data);
     }
   }
   return detailedMap;
@@ -96,7 +95,7 @@ for(const repoName in latestWithDetail) {
     simpleCommits.push(commit);
   }
 }
-console.log({latestWithDetail,refToRepo});
+console.log({latestWithDetail,zero:latestWithDetail["Astisme/astisme"][0],refToRepo});
 
 const sortedCommits = simpleCommits
                         .sort((a,b) => a.commit.author.date - b.commit.author.date)
