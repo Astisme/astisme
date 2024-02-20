@@ -1,23 +1,21 @@
-# Well, hello there... 👋
+# Well, hello there... <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="40">
 
 <details>
-<summary>My most recent work</summary>
-## My most recent work
+<summary><h2>My most recent work</h2></summary>
+
+<!-- add commits here -->
 
 </details>
 <details>
-<summary>What I've learnt</summary>
-## What I've learnt
+<summary><h2>My most recent stars</h2></summary>
 
-<!--
-=======
+<!-- add stars here -->
 </details>
 <details>
-<summary>Give me a visit</summary>
->>>>>>> f817916 (license)
-## Give me a visit
-[Click here](https://www.alfredoit.dev/) to visit my website.
--->
+<summary><h2>I've recently learned...</h2></summary>
 
-Do you want to know me better? [Check out this link](https://www.alfredoit.dev/aboutme/)
+
 </details>
+
+Do you want to know me better?
+[Check out this link](https://www.alfredoit.dev/aboutme/)

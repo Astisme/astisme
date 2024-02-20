@@ -1,6 +1,5 @@
 import { Octokit } from "octokit"; 
 const octokit = new Octokit({ auth: process.env.TOKEN });
-console.log({pet:process.env.TOKEN,peut:process.env.UPDATE_TOKEN,pegt:process.env.GITHUB_TOKEN});
 
 async function getRepos() {
   const repos = await octokit.request("GET https://api.github.com/users/Astisme/repos");
@@ -12,23 +11,58 @@ async function getCommits(full_name) {
   return await commits.data;
 }
 
-async function run() {
-  const myRepos = await getRepos();
-  const latestCommits = [];
-
-  for(const repo of myRepos){
+async function getLatestCommits(repos) {
+  const latest = [];
+  for(const repo of repos){
     const commits = await getCommits(repo.full_name);
     let i = 0;
     for(const com of commits){
       if(i >= 10) break;
-      latestCommits.push(com);
+      latest.push(com);
       i++;
     }
   }
-
-  const sortedCommits = latestCommits.sort((a,b) => a.commit.author.date - b.commit.author.date).slice(0, 10);
-  console.log({zero:sortedCommits[0],com:sortedCommits[0].commit});
-  //commit.message, commit.author.date, commit.html_url, +/-
+  return latest;
 }
 
-run();
+async function getStarredByMe() {
+  const starred = await octokit.request('GET /user/starred?sort=created', {
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28',
+      "Accept": "application/vnd.github.star+json"
+     }
+  });
+  return await starred.data;
+}
+
+async function getReadMe() {
+  const buffer = await fs.readFileSync("README.md");
+  return await buffer.toString();
+}
+
+function formatCommit(commit) {
+  return commit;
+}
+
+function formatAllCommits(commits) {
+  const formattedCommits = [];
+  for(const com of commits)
+    formattedCommits.push(formatCommit(com));
+  return formattedCommits;
+}
+ 
+function updateReadme(readmeFile, afterThisRow, toInsert) {}
+
+const myRepos = await getRepos();
+const latestCommits = await getLatestCommits(myRepos);
+
+const sortedCommits = latestCommits.sort((a,b) => a.commit.author.date - b.commit.author.date)
+                        .slice(0, 10);
+//commit.message, commit.author.date, commit.html_url, +/-
+const formattedCommits = formatAllCommits(sortedCommits);
+//console.log({zero:formattedCommits[0],com:formattedCommits[0].commit});
+
+const readme = await getReadMe();
+
+const starred = await getStarredByMe();
+//console.log({starred});
