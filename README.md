@@ -1,6 +1,4 @@
-# Well, hello there... <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="40">
-
-<h1 align="center">Well.. Hello There 😉 I'm Alfredo</h1>
+<h1 align="center">Well.. Hello There <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="40"> I'm Alfredo</h1>
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=astisme&label=Profile%20views&color=0e75b6&style=flat" alt="astisme" /> </p>
 
 - 🔭 I’m currently working on [Again, Why Salesforce](https://www.github.com/Astisme/again-why-salesforce)
