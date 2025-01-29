@@ -1,6 +1,8 @@
 <h1 align="center">Well.. Hello There <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="40"> I'm Alfredo</h1>
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=astisme&label=Profile%20views&color=0e75b6&style=flat" alt="astisme" /> </p>
 
+[![trophy](https://github-profile-trophy.vercel.app/?username=Astisme)](https://github.com/ryo-ma/github-profile-trophy)
+
 - 🔭 I’m currently working on [Again, Why Salesforce](https://www.github.com/Astisme/again-why-salesforce)
 
 - 🌱 I’m currently learning **Browser Extensions, Salesforce,**
