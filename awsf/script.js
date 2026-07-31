@@ -2,6 +2,12 @@ const navToggle = document.querySelector(".nav-toggle");
 const siteNav = document.querySelector("#site-nav");
 const releaseLabels = document.querySelectorAll(".js-current-release");
 const markdownSource = document.querySelector("[data-markdown-source]");
+const totalUserLabels = document.querySelectorAll(".js-total-users");
+const averageRatingLabels = document.querySelectorAll(".js-average-rating");
+const wikiTitleLabel = document.querySelector(".js-wiki-title");
+const wikiDescriptionLabel = document.querySelector(".js-wiki-description");
+const articleToc = document.querySelector(".js-article-toc");
+const wikiSidebar = document.querySelector(".sidebar");
 
 navToggle?.addEventListener("click", () => {
 	const isOpen = navToggle.getAttribute("aria-expanded") === "true";
@@ -60,7 +66,38 @@ const wikiDocuments = {
 	"Open-Other-Org": "Open-Other-Org.md",
 	"Tutorial": "Tutorial.md",
 	"Safari-Installation": "Safari-Installation.md",
+	"What-is-a-Tab": "Tab-Info/What-is-a-Tab.md",
+	"Pinned-Tabs": "Tab-Info/Pinned-Tabs.md",
+	"Manual-Sort": "Tab-Info/Manual-Sort.md",
 };
+
+const wikiTitles = {
+	"Home": "Wiki home",
+	"Manage-Tabs": "Manage Tabs",
+	"Manage-Tabs-modal": "Manage Tabs modal",
+	"Save-a-Tab": "Save a Tab",
+	"Remove-a-Tab": "Remove a Tab",
+	"Remove-Multiple-Tabs": "Remove Multiple Tabs",
+	"Import-Tabs": "Import Tabs",
+	"Export-Tabs": "Export Tabs",
+	"Sort-Tabs": "Sort Tabs",
+	"Context-Menu": "Context Menus",
+	"Commands": "Commands / Hot Keys",
+	"Settings": "Settings",
+	"Style-your-Tabs": "Style your Tabs",
+	"Pick-Language": "Pick language",
+	"Optional-Permissions": "Optional permissions",
+	"No-Simple-Analytics": "Disable Simple Analytics",
+	"Keep-Tabs-Sorted": "Keep Tabs sorted",
+	"Open-Other-Org": "Open Other Org",
+	"Tutorial": "Tutorial",
+	"Safari-Installation": "Safari Installation",
+	"What-is-a-Tab": "What is a Tab?",
+	"Pinned-Tabs": "Pinned Tabs",
+	"Manual-Sort": "Manual Sort",
+};
+
+globalThis.awsfWikiDocuments = wikiDocuments;
 
 /**
  * Detects current browser family for extension store routing.
@@ -122,6 +159,92 @@ async function getLatestReleaseLabel() {
 }
 
 /**
+ * Animates numeric text from 0 to target value.
+ *
+ * @param {Element} label Target label.
+ * @param {number} target Numeric target.
+ * @param {{ prefix?: string; suffix?: string; decimals?: number; duration?: number; }} [options] Animation options.
+ * @returns {void}
+ */
+function animateNumber(label, target, options = {}) {
+	const {
+		prefix = "",
+		suffix = "",
+		decimals = 0,
+		duration = 900,
+	} = options;
+	const formatter = new Intl.NumberFormat("en", {
+		minimumFractionDigits: decimals,
+		maximumFractionDigits: decimals,
+	});
+	if (globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+		label.textContent = `${prefix}${formatter.format(target)}${suffix}`;
+		return;
+	}
+	const startTime = performance.now();
+
+	/**
+	 * Renders next animation frame.
+	 *
+	 * @param {number} frameTime Frame timestamp.
+	 * @returns {void}
+	 */
+	function tick(frameTime) {
+		const progress = Math.min((frameTime - startTime) / duration, 1);
+		const eased = 1 - ((1 - progress) ** 3);
+		const value = target * eased;
+		label.textContent = `${prefix}${formatter.format(value)}${suffix}`;
+		if (progress < 1) {
+			requestAnimationFrame(tick);
+		}
+	}
+
+	requestAnimationFrame(tick);
+}
+
+/**
+ * Animates semantic version text from zero segments to target segments.
+ *
+ * @param {Element} label Target label.
+ * @param {string} value Release label.
+ * @returns {boolean} True when release was animated.
+ */
+function animateReleaseLabel(label, value) {
+	const match = value.match(/^(v?)(\d+)\.(\d+)\.(\d+)(.*)$/i);
+	if (!match) {
+		return false;
+	}
+	const prefix = match[1];
+	const major = Number(match[2]);
+	const minor = Number(match[3]);
+	const patch = Number(match[4]);
+	const suffix = match[5];
+	const duration = 900;
+	if (globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+		label.textContent = value;
+		return true;
+	}
+	const startTime = performance.now();
+
+	/**
+	 * Renders next semantic version animation frame.
+	 *
+	 * @param {number} frameTime Frame timestamp.
+	 * @returns {void}
+	 */
+	function tick(frameTime) {
+		const progress = Math.min((frameTime - startTime) / duration, 1);
+		const eased = 1 - ((1 - progress) ** 3);
+		label.textContent = `${prefix}${Math.floor(major * eased)}.${Math.floor(minor * eased)}.${Math.floor(patch * eased)}${suffix}`;
+		if (progress < 1) {
+			requestAnimationFrame(tick);
+		}
+	}
+	requestAnimationFrame(tick);
+	return true;
+}
+
+/**
  * Replaces static release placeholders with live GitHub release value.
  *
  * @returns {Promise<void>} Promise resolved after release labels update or fallback.
@@ -130,139 +253,93 @@ async function hydrateReleaseLabels() {
 	const latestRelease = await getLatestReleaseLabel();
 	if (!latestRelease) {
 		releaseLabels.forEach((label) => {
-			label.textContent = "Latest";
+			label.textContent = "0";
 		});
 		return;
 	}
 	releaseLabels.forEach((label) => {
-		label.textContent = latestRelease;
+		if (!animateReleaseLabel(label, latestRelease)) {
+			label.textContent = latestRelease;
+		}
 	});
 }
 
 /**
- * Escapes text before writing generated HTML.
+ * Creates a stable slug from heading text.
  *
- * @param {string} value Raw text.
- * @returns {string} Escaped text.
+ * @param {string} value Heading text.
+ * @param {Set<string>} usedSlugs Slugs already assigned.
+ * @returns {string} Unique slug.
  */
-function escapeHtml(value) {
-	return value
-		.replaceAll("&", "&amp;")
-		.replaceAll("<", "&lt;")
-		.replaceAll(">", "&gt;")
-		.replaceAll('"', "&quot;");
-}
-
-/**
- * Converts Markdown inline links and code to safe HTML.
- *
- * @param {string} value Markdown text.
- * @returns {string} HTML text.
- */
-function renderInlineMarkdown(value) {
-	return escapeHtml(value)
-		.replaceAll(/`([^`]+)`/g, "<code>$1</code>")
-		.replaceAll(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-		.replaceAll(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, href) => {
-			const url = String(href);
-			if (url.startsWith("http") || url.startsWith("mailto:") || url.startsWith("#")) {
-				return `<a href="${escapeHtml(url)}">${label}</a>`;
-			}
-			const localDoc = url
-				.replaceAll("../", "")
-				.replaceAll("./", "")
-				.replaceAll(".md", "")
-				.split("/")
-				.pop() || "Home";
-			const target = wikiDocuments[localDoc] ? `wiki.html?doc=${encodeURIComponent(localDoc)}` : "wiki.html";
-			return `<a href="${escapeHtml(target)}">${label}</a>`;
-		});
-}
-
-/**
- * Converts small Markdown subset used by project docs into HTML.
- *
- * @param {string} markdown Raw Markdown.
- * @returns {string} Rendered HTML.
- */
-function renderMarkdown(markdown) {
-	const visibleMarkdown = markdown.replaceAll(/<!--[\s\S]*?-->/g, "");
-	const blocks = [];
-	let listItems = [];
-
-	/**
-	 * Flushes pending list items into block list.
-	 *
-	 * @returns {void}
-	 */
-	function flushList() {
-		if (listItems.length === 0) {
-			return;
-		}
-		blocks.push(`<ul>${listItems.join("")}</ul>`);
-		listItems = [];
+function createSlug(value, usedSlugs) {
+	const baseSlug = value
+		.toLowerCase()
+		.replaceAll(/[^a-z0-9\s-]/g, "")
+		.trim()
+		.replaceAll(/\s+/g, "-") || "section";
+	let slug = baseSlug;
+	let index = 2;
+	while (usedSlugs.has(slug)) {
+		slug = `${baseSlug}-${index}`;
+		index += 1;
 	}
-
-	for (const rawLine of visibleMarkdown.split(/\r?\n/)) {
-		const line = rawLine.trim();
-		if (!line || line === "---") {
-			flushList();
-			continue;
-		}
-		if (line.startsWith("<!--")) {
-			flushList();
-			continue;
-		}
-		if (line.startsWith("# ")) {
-			flushList();
-			blocks.push(`<h1>${renderInlineMarkdown(line.slice(2))}</h1>`);
-			continue;
-		}
-		if (line.startsWith("## ")) {
-			flushList();
-			blocks.push(`<h2>${renderInlineMarkdown(line.slice(3))}</h2>`);
-			continue;
-		}
-		if (line.startsWith("### ")) {
-			flushList();
-			blocks.push(`<h3>${renderInlineMarkdown(line.slice(4))}</h3>`);
-			continue;
-		}
-		if (line.startsWith("> ")) {
-			flushList();
-			blocks.push(`<blockquote>${renderInlineMarkdown(line.slice(2))}</blockquote>`);
-			continue;
-		}
-		if (line.startsWith("- ") || line.startsWith("* ") || /^\d+\.\s/.test(line)) {
-			listItems.push(`<li>${renderInlineMarkdown(line.replace(/^(-|\*|\d+\.)\s/, ""))}</li>`);
-			continue;
-		}
-		flushList();
-		blocks.push(`<p>${renderInlineMarkdown(line.replaceAll("\\", ""))}</p>`);
-	}
-	flushList();
-	return blocks.join("");
+	usedSlugs.add(slug);
+	return slug;
 }
 
 /**
- * Converts changelog Markdown releases into collapsed detail panels.
+ * Builds right-side table of contents from rendered article headings.
  *
- * @param {string} markdown Raw changelog Markdown.
- * @returns {string} Rendered changelog HTML.
+ * @returns {void}
  */
-function renderChangelog(markdown) {
-	const visibleMarkdown = markdown.replaceAll(/<!--[\s\S]*?-->/g, "");
-	const releaseParts = visibleMarkdown.split(/\n# (?=v\d+\.\d+\.\d+)/);
-	const intro = renderMarkdown(releaseParts.shift() || "");
-	const releases = releaseParts
-		.filter((part) => part.trim())
-		.map((part, index) => {
-			const releaseMarkdown = `# ${part.trim()}`;
-			const title = releaseMarkdown.match(/^#\s+(.+)$/m)?.[1] || "Release";
-			return `<details class="release-panel" ${index === 0 ? "open" : ""}><summary>${escapeHtml(title)}</summary>${renderMarkdown(releaseMarkdown.replace(/^#\s+.+\n?/, ""))}</details>`;
-		})
-		.join("");
-	return `${intro}${releases}`;
+function hydrateArticleToc() {
+	if (!articleToc || !markdownSource) {
+		return;
+	}
+	const headings = [...markdownSource.querySelectorAll("h1, h2, h3, h4")];
+	const usedSlugs = new Set();
+	articleToc.replaceChildren();
+	if (headings.length === 0) {
+		const link = document.createElement("a");
+		link.href = "#content";
+		link.textContent = "Overview";
+		articleToc.append(link);
+		return;
+	}
+	for (const heading of headings) {
+		if (!heading.id) {
+			heading.id = createSlug(heading.textContent || "section", usedSlugs);
+		}
+		const link = document.createElement("a");
+		link.href = `#${heading.id}`;
+		link.textContent = heading.textContent || "Section";
+		link.className = `toc-${heading.tagName.toLowerCase()}`;
+		articleToc.append(link);
+	}
+}
+
+/**
+ * Highlights current wiki page in left navigation.
+ *
+ * @returns {void}
+ */
+function hydrateWikiSidebar() {
+	if (!wikiSidebar) {
+		return;
+	}
+	const doc = new URLSearchParams(location.search).get("doc") || "Home";
+	const currentHref = `wiki.html?doc=${encodeURIComponent(doc)}`;
+	for (const link of wikiSidebar.querySelectorAll("a")) {
+		if (!(link instanceof HTMLAnchorElement)) {
+			continue;
+		}
+		const isCurrent = link.getAttribute("href") === currentHref;
+		if (isCurrent) {
+			link.setAttribute("aria-current", "page");
+		} else {
+			link.removeAttribute("aria-current");
+		}
+	}
 }
 
 /**
@@ -275,13 +352,84 @@ function getMarkdownUrl(target) {
 	if (target.getAttribute("data-markdown-source") === "changelog") {
 		return "https://raw.githubusercontent.com/Astisme/again-why-salesforce/main/docs/CHANGELOG.md";
 	}
-	if (target.getAttribute("data-markdown-source") === "security") {
-		return "https://raw.githubusercontent.com/Astisme/again-why-salesforce/main/docs/SECURITY.md";
+	if (target.getAttribute("data-markdown-source") === "privacy") {
+		return "https://raw.githubusercontent.com/Astisme/again-why-salesforce/main/docs/PRIVACY_POLICY.md";
 	}
 
 	const doc = new URLSearchParams(location.search).get("doc") || "Home";
 	const path = wikiDocuments[doc] || wikiDocuments.Home;
 	return `https://raw.githubusercontent.com/wiki/Astisme/again-why-salesforce/${path}`;
+}
+
+/**
+ * Fetches public store and analytics metrics.
+ *
+ * @returns {Promise<{ users: number; rating: number | null; }>} Combined public metrics.
+ */
+async function getPublicStoreMetrics() {
+	const [chromeResult, edgeResult, firefoxResult, safariResult] = await Promise.allSettled([
+		fetch("https://img.shields.io/chrome-web-store/users/bceeoimjhgjbihanbiifgpndmkklajbi.json?label=Chrome%20Users&color=blue").then((response) => response.json()),
+		fetch("https://img.shields.io/badge/dynamic/json.json?label=Edge%20Users&query=%24.activeInstallCount&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fdfdjpokbfeaamjcomllncennmfhpldmm").then((response) => response.json()),
+		fetch("https://addons.mozilla.org/api/v5/addons/addon/again@why.salesforce/").then((response) => response.json()),
+		fetch("https://simpleanalytics.com/extension.again.whysalesforce.json?version=5&fields=visitors&start=today-7d&info=false&browser_name=Safari").then((response) => response.json()),
+	]);
+	const chrome = chromeResult.status === "fulfilled" ? chromeResult.value : {};
+	const edge = edgeResult.status === "fulfilled" ? edgeResult.value : {};
+	const firefox = firefoxResult.status === "fulfilled" ? firefoxResult.value : {};
+	const safari = safariResult.status === "fulfilled" ? safariResult.value : {};
+	const users = parseCompactNumber(chrome.value || chrome.message || 0) +
+		parseCompactNumber(edge.value || edge.message || 0) +
+		Number(firefox.average_daily_users || 0) +
+		Number(safari.visitors || 0);
+	const firefoxRatingCount = Number(firefox.ratings?.count || 0);
+	const ratingCount = firefoxRatingCount;
+	const rating = ratingCount > 0
+		? Number(firefox.ratings?.average || 0)
+		: null;
+
+	return { users, rating };
+}
+
+/**
+ * Parses badge counts such as "221", "1.2k", or "2M".
+ *
+ * @param {string | number} value Badge count.
+ * @returns {number} Parsed count.
+ */
+function parseCompactNumber(value) {
+	if (typeof value === "number") {
+		return value;
+	}
+	const normalized = value.trim().toLowerCase().replaceAll(",", "");
+	const multiplier = normalized.endsWith("k")
+		? 1_000
+		: normalized.endsWith("m")
+			? 1_000_000
+			: 1;
+	return Number.parseFloat(normalized.replace(/[km]$/, "")) * multiplier || 0;
+}
+
+/**
+ * Updates public usage and rating metrics.
+ *
+ * @returns {Promise<void>} Promise resolved after metrics update.
+ */
+async function hydratePublicStoreMetrics() {
+	const metrics = await getPublicStoreMetrics();
+	totalUserLabels.forEach((label) => {
+		if (metrics.users <= 0) {
+			label.textContent = "0";
+			return;
+		}
+		animateNumber(label, metrics.users);
+	});
+	averageRatingLabels.forEach((label) => {
+		if (metrics.rating === null) {
+			label.textContent = "0";
+			return;
+		}
+		animateNumber(label, metrics.rating, { decimals: 1, suffix: " / 5" });
+	});
 }
 
 /**
@@ -291,6 +439,10 @@ function getMarkdownUrl(target) {
  */
 async function hydrateMarkdown() {
 	if (!markdownSource) {
+		return;
+	}
+	if (!globalThis.awsfMarkdown) {
+		markdownSource.innerHTML = "<p>Could not load Markdown renderer.</p>";
 		return;
 	}
 	const url = getMarkdownUrl(markdownSource);
@@ -303,13 +455,32 @@ async function hydrateMarkdown() {
 		return;
 	}
 	const markdown = await response.text();
+	if (markdownSource.getAttribute("data-markdown-source") === "wiki") {
+		const doc = new URLSearchParams(location.search).get("doc") || "Home";
+		if (wikiTitleLabel) {
+			wikiTitleLabel.textContent = wikiTitles[doc] || doc.replaceAll("-", " ");
+		}
+		if (wikiDescriptionLabel) {
+			wikiDescriptionLabel.textContent = `Article from ${wikiDocuments[doc] || wikiDocuments.Home}`;
+		}
+	}
 	markdownSource.innerHTML = markdownSource.getAttribute("data-markdown-source") === "changelog"
-		? renderChangelog(markdown)
-		: renderMarkdown(markdown);
+		? globalThis.awsfMarkdown.renderChangelog(markdown)
+		: globalThis.awsfMarkdown.renderMarkdown(markdown);
+	hydrateArticleToc();
 }
 
 updateInstallLinks();
+hydrateWikiSidebar();
 hydrateReleaseLabels().catch(() => {});
+hydratePublicStoreMetrics().catch(() => {
+	totalUserLabels.forEach((label) => {
+		label.textContent = "0";
+	});
+	averageRatingLabels.forEach((label) => {
+		label.textContent = "0";
+	});
+});
 hydrateMarkdown().catch(() => {
 	if (markdownSource) {
 		markdownSource.innerHTML = "<p>Could not load GitHub raw Markdown.</p>";

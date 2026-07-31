@@ -106,7 +106,7 @@ img {
 .page-hero,
 .section,
 .showcase,
-.security-band,
+.policy-band,
 .site-footer {
 	width: min(1180px, calc(100% - 36px));
 	margin-inline: auto;
@@ -225,7 +225,7 @@ h3 {
 
 .metric-band {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 	width: min(1180px, calc(100% - 36px));
 	margin: 0 auto 86px;
 	background: var(--ink);
@@ -260,6 +260,21 @@ h3 {
 .section-heading {
 	max-width: 720px;
 	margin-bottom: 28px;
+}
+
+.section-actions {
+	margin-top: 18px;
+}
+
+.split-section .section-actions {
+	grid-column: 1 / -1;
+	margin-top: 0;
+}
+
+.inline-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
 }
 
 .section-heading p:not(.eyebrow) {
@@ -313,7 +328,7 @@ h3 {
 .feature-grid p,
 .repo-card p,
 .showcase-copy p,
-.security-band p,
+.policy-band p,
 .site-footer {
 	color: var(--muted);
 }
@@ -396,7 +411,7 @@ h3 {
 
 .showcase-copy a,
 .repo-card a,
-.security-band a,
+.policy-band a,
 .site-footer a,
 .docs-grid a,
 .markdown-body a {
@@ -554,6 +569,42 @@ h3 {
 	background: #f4faf8;
 }
 
+.table-wrap {
+	width: 100%;
+	margin: 20px 0;
+	overflow-x: auto;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+}
+
+.markdown-body table {
+	width: 100%;
+	min-width: 640px;
+	border-collapse: collapse;
+}
+
+.markdown-body th,
+.markdown-body td {
+	padding: 12px 14px;
+	border-bottom: 1px solid var(--line);
+	text-align: left;
+	vertical-align: top;
+}
+
+.markdown-body th {
+	background: #eef5fa;
+	color: var(--ink);
+	font-weight: 900;
+}
+
+.markdown-body td {
+	color: var(--muted);
+}
+
+.markdown-body tr:last-child td {
+	border-bottom: 0;
+}
+
 .release-panel {
 	margin-top: 14px;
 	border: 1px solid var(--line);
@@ -590,7 +641,7 @@ h3 {
 	font-weight: 900;
 }
 
-.security-band {
+.policy-band {
 	display: grid;
 	grid-template-columns: 0.7fr 1fr auto;
 	gap: 28px;
@@ -603,12 +654,12 @@ h3 {
 	border-radius: 8px;
 }
 
-.security-band h2 {
+.policy-band h2 {
 	margin-bottom: 0;
 	font-size: clamp(1.6rem, 3vw, 2.5rem);
 }
 
-.security-band p {
+.policy-band p {
 	margin-bottom: 0;
 }
 
@@ -653,7 +704,7 @@ h3 {
 	.hero,
 	.showcase,
 	.install-section,
-	.security-band,
+	.policy-band,
 	.split-section,
 	.feature-detail article,
 	.feature-detail article:nth-child(even) {
@@ -683,7 +734,7 @@ h3 {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
-	.security-band {
+	.policy-band {
 		align-items: start;
 	}
 }
@@ -698,7 +749,7 @@ h3 {
 	.page-hero,
 	.section,
 	.showcase,
-	.security-band,
+	.policy-band,
 	.site-footer,
 	.metric-band {
 		width: min(100% - 28px, 1180px);
